@@ -68,7 +68,9 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
     while(current_ebp)
     {
         cprintf("  ebp  %08x  eip %08x  args %08x %08x %08x %08x %08x\n",current_ebp,*(current_ebp+1),*(current_ebp+2),*(current_ebp+3),*(current_ebp+4),*(current_ebp+5),*(current_ebp+6));
-        debuginfo_eip(*(current_ebp+1),&eip_debug_info);
+        //*(current_ebp+1)-5:*(current_ebp+1)表示call指令的下一条指令的地址值，在jos中call的指令长度为5bytes,所以减5
+        debuginfo_eip(*(current_ebp+1)-5,&eip_debug_info);
+        cprintf("test eip is %08x\n",*(current_ebp+1)-5);
         cprintf("\t%s:%d: %.*s+%d\n",  eip_debug_info.eip_file,\
                                        eip_debug_info.eip_line,\
                                        eip_debug_info.eip_fn_namelen,eip_debug_info.eip_fn_name,\
