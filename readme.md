@@ -45,4 +45,6 @@ make
 make install
 ```
 
-
+## 参考
+1. [Report for lab1, Shian Chen](https://github.com/Clann24/jos/tree/master/lab1)
+2. [MIT 操作系统实验 MIT JOS lab1](http://blog.csdn.net/cinmyheart/article/details/39754269)
