@@ -24,7 +24,7 @@ make all-target-libgcc
 make install-target-libgcc
 ```
 
-编译安装gdb
+## 在OSX 10.11中编译安装gdb
 
 ```
 brew fetch gdb
@@ -36,7 +36,7 @@ make all
 make install
 ```
 
-编译安装qemu
+## 在OSX 10.11中编译安装qemu
 
 ```
 git clone https://github.com/geofft/qemu.git -b 6.828-1.7.0
@@ -44,7 +44,16 @@ git clone https://github.com/geofft/qemu.git -b 6.828-1.7.0
 make
 make install
 ```
+## Excercise 3
+
+> At what point does the processor start executing 32-bit code? What exactly causes the switch from 16- to 32-bit mode?
+
+> What is the last instruction of the boot loader executed, and what is the first instruction of the kernel it just loaded?
+Where is the first instruction of the kernel?
+How does the boot loader decide how many sectors it must read in order to fetch the entire kernel from disk? Where does it find this information?
+
 
 ## 参考
 1. [Report for lab1, Shian Chen](https://github.com/Clann24/jos/tree/master/lab1)
 2. [MIT 操作系统实验 MIT JOS lab1](http://blog.csdn.net/cinmyheart/article/details/39754269)
+3. [Tools Used in 6.828](https://pdos.csail.mit.edu/6.828/2014/tools.html)
