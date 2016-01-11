@@ -48,7 +48,7 @@ make install
 
 > At what point does the processor start executing 32-bit code? What exactly causes the switch from 16- to 32-bit mode?
 
-从boot/boot.S中的第55行`ljmp    $PROT_MODE_CSEG, $protcseg`后处理器开始执行32位指令代码。主要以下代码使处理器从16位模式转变成32位模式。
+从boot/boot.S中的第55行`ljmp $PROT_MODE_CSEG, $protcseg`后处理器开始执行32位指令代码。主要以下代码使处理器从16位模式转变成32位模式。将寄存器cr0中的最后一位设置成1，即代表开启了保护模式。
 
 ```
 lgdt    gdtdesc
@@ -59,6 +59,8 @@ movl    %eax, %cr0
 
 > What is the last instruction of the boot loader executed, and what is the first instruction of the kernel it just loaded?
 
+boot loader最后执行的指令是`((void (*)(void)) (ELFHDR->e_entry));`,翻译成汇编后是`7d6b:ff 15 18 00 01 00    call   *0x10018`
+kernel执行的第一条指令是`	movw	$0x1234,0x472			# warm boot`
 
 > Where is the first instruction of the kernel?
 
