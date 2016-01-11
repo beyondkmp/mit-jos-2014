@@ -48,9 +48,22 @@ make install
 
 > At what point does the processor start executing 32-bit code? What exactly causes the switch from 16- to 32-bit mode?
 
+从boot/boot.S中的第55行`ljmp    $PROT_MODE_CSEG, $protcseg`后处理器开始执行32位指令代码。主要以下代码使处理器从16位模式转变成32位模式。
+
+```
+lgdt    gdtdesc
+movl    %cr0, %eax
+orl     $CR0_PE_ON, %eax
+movl    %eax, %cr0
+```
+
 > What is the last instruction of the boot loader executed, and what is the first instruction of the kernel it just loaded?
-Where is the first instruction of the kernel?
-How does the boot loader decide how many sectors it must read in order to fetch the entire kernel from disk? Where does it find this information?
+
+
+> Where is the first instruction of the kernel?
+
+
+> How does the boot loader decide how many sectors it must read in order to fetch the entire kernel from disk? Where does it find this information?
 
 
 ## 参考
