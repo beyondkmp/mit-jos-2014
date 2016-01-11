@@ -60,10 +60,26 @@ movl    %eax, %cr0
 > What is the last instruction of the boot loader executed, and what is the first instruction of the kernel it just loaded?
 
 boot loader最后执行的指令是`((void (*)(void)) (ELFHDR->e_entry));`,翻译成汇编后是`7d6b:ff 15 18 00 01 00    call   *0x10018`
+
 kernel执行的第一条指令是`	movw	$0x1234,0x472			# warm boot`
 
 > Where is the first instruction of the kernel?
 
+一开始没有认真看`call *0x10018`这条汇编指令，以为是0x10018。这是错误的，*0x10018代表是0x10018处的地址，用gdb查看下
+
+```
+(gdb) b *0x7d6b
+Breakpoint 1 at 0x7d6b
+(gdb) c
+Continuing.
+The target architecture is assumed to be i386
+=> 0x7d6b:	call   *0x10018
+
+Breakpoint 1, 0x00007d6b in ?? ()
+(gdb) x/x 0x10018
+0x10018:	0x0010000c
+(gdb)
+```
 
 > How does the boot loader decide how many sectors it must read in order to fetch the entire kernel from disk? Where does it find this information?
 
