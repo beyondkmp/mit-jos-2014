@@ -65,7 +65,7 @@ kernel执行的第一条指令是`	movw	$0x1234,0x472			# warm boot`
 
 > Where is the first instruction of the kernel?
 
-一开始没有认真看`call *0x10018`这条汇编指令，以为是0x10018。这是错误的，*0x10018代表是0x10018处的地址，用gdb查看下
+一开始没有认真看`call *0x10018`这条汇编指令，以为是0x10018。这是错误的，*0x10018代表是0x10018处的地址，用gdb查看下可知是0x10000c。
 
 ```
 (gdb) b *0x7d6b
@@ -78,11 +78,31 @@ The target architecture is assumed to be i386
 Breakpoint 1, 0x00007d6b in ?? ()
 (gdb) x/x 0x10018
 0x10018:	0x0010000c
-(gdb)
 ```
 
 > How does the boot loader decide how many sectors it must read in order to fetch the entire kernel from disk? Where does it find this information?
 
+ELF的格式可以用下图来描述:
+
+![elf](image/elf.png)
+
+ELF文件主要有ELF header 和file data两部分组成，file data包括以下三个部分：
+
+* Program header table,可以描述一个或多个segment
+* Section header table,可以描述0个或多个sections
+* Data,programe header table 或者Section header table指向的数据
+
+ELF文件格式提供了两种不同的视角，在汇编器和链接器看来，ELF文件是由Section Header Table描述的一系列Section的集合，而执行一个ELF文件时，在加载器（Loader）看来它是由Program Header Table描述的一系列Segment的集合,参考文献[ELF文件](http://docs.linuxtone.org/ebooks/C&CPP/c/ch18s05.html#ftn.id3014082)
+
+```c
+// load each program segment (ignores ph flags)
+ph = (struct Proghdr *) ((uint8_t *) ELFHDR + ELFHDR->e_phoff);
+eph = ph + ELFHDR->e_phnum;
+for (; ph < eph; ph++)
+	// p_pa is the load address of this segment (as well
+	// as the physical address)
+	readseg(ph->p_pa, ph->p_memsz, ph->p_offset);
+```
 
 ## 参考
 1. [Report for lab1, Shian Chen](https://github.com/Clann24/jos/tree/master/lab1)
