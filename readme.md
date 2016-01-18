@@ -103,6 +103,114 @@ for (; ph < eph; ph++)
 	// as the physical address)
 	readseg(ph->p_pa, ph->p_memsz, ph->p_offset);
 ```
+## Excercise 4
+
+> Read 5.1 (Pointers and Addresses) through 5.5 (Character Pointers and Functions) in K&R. Then download the code for pointers.c, run it, and make sure you understand where all of the printed values come from. In particular, make sure you understand where the pointer addresses in lines 1 and 6 come from, how all the values in lines 2 through 4 get there, and why the values printed in line 5 are seemingly corrupted.
+
+pointers.c的代码如下：
+
+```
+#include <stdio.h>
+#include <stdlib.h>
+
+void
+f(void)
+{
+    int a[4];
+    int *b = malloc(16);
+    int *c;
+    int i;
+
+    printf("1: a = %p, b = %p, c = %p\n", a, b, c);
+
+    c = a;
+    for (i = 0; i < 4; i++)
+	a[i] = 100 + i;
+    c[0] = 200;
+    printf("2: a[0] = %d, a[1] = %d, a[2] = %d, a[3] = %d\n",
+	   a[0], a[1], a[2], a[3]);
+
+    c[1] = 300;
+    *(c + 2) = 301;
+    3[c] = 302;
+    printf("3: a[0] = %d, a[1] = %d, a[2] = %d, a[3] = %d\n",
+	   a[0], a[1], a[2], a[3]);
+
+    c = c + 1;
+    *c = 400;
+    printf("4: a[0] = %d, a[1] = %d, a[2] = %d, a[3] = %d\n",
+	   a[0], a[1], a[2], a[3]);
+
+    c = (int *) ((char *) c + 1);
+    *c = 500;
+    printf("5: a[0] = %d, a[1] = %d, a[2] = %d, a[3] = %d\n",
+	   a[0], a[1], a[2], a[3]);
+
+    b = (int *) a + 1;
+    c = (int *) ((char *) a + 1);
+    printf("6: a = %p, b = %p, c = %p\n", a, b, c);
+}
+
+int
+main(int ac, char **av)
+{
+    f();
+    return 0;
+}
+```
+
+运行pointers.c的结果如下:
+
+```
+beyond@birdcat-2:~/code/algorithm|⇒  ./a.out
+1: a = 0x7fff562df590, b = 0x7fbb9bc03280, c = 0x109920000
+2: a[0] = 200, a[1] = 101, a[2] = 102, a[3] = 103
+3: a[0] = 200, a[1] = 300, a[2] = 301, a[3] = 302
+4: a[0] = 200, a[1] = 400, a[2] = 301, a[3] = 302
+5: a[0] = 200, a[1] = 128144, a[2] = 256, a[3] = 302
+6: a = 0x7fff562df590, b = 0x7fff562df594, c = 0x7fff562df591
+```
+变量a和b都代表整数数组,分配相应的内存，c是一个整数指针。在23行中可以看到3[c]=302;这句等价于c[3]=302,上面两个写法都是合格的。
+
+`c = (int *)((char *)c + 1)`,是将整数指针强制转换成char型指针，加1后只会增加一个byte，而不会像int型指针增加4个byte。输入是0x000000c8，在存储器里面存的顺序是c8000000,用gdb调试：
+
+```
+(gdb) b 32
+Breakpoint 1 at 0x100000da5: file point.c, line 32.
+(gdb) r
+Starting program: /Users/beyond/code/algorithm/a.out
+1: a = 0x7fff5fbff530, b = 0x100103790, c = 0x100000000
+2: a[0] = 200, a[1] = 101, a[2] = 102, a[3] = 103
+3: a[0] = 200, a[1] = 300, a[2] = 301, a[3] = 302
+4: a[0] = 200, a[1] = 400, a[2] = 301, a[3] = 302
+
+Breakpoint 1, f () at point.c:32
+32	    c = (int *) ((char *) c + 1);
+(gdb) x /x a
+0x7fff5fbff530:	0x000000c8
+(gdb) x /4x a
+0x7fff5fbff530:	0x000000c8	0x00000190	0x0000012d	0x0000012e
+(gdb) print a
+$1 = {200, 400, 301, 302}
+(gdb) n
+33	    *c = 500;
+(gdb) print c
+$2 = (int *) 0x7fff5fbff535
+(gdb) n
+35		   a[0], a[1], a[2], a[3]);
+(gdb) x /4x a
+0x7fff5fbff530:	0x000000c8	0x0001f490	0x00000100	0x0000012e
+```
+用下面的转化可以很清楚得到a数组是怎么变化的。
+
+```
+# a数组原始数据
+c8 00 00 00 90 01 00 00 2d 01 00 00 2e 01 00 00
+# 从第5个开始赋值：f4 01 00 00
+c8 00 00 00 90 f4 01 00 00 01 00 00 2e 01 00 00
+# 最后调整顺序还原数组中数字
+00 00 00 c8 00 01 f4 90 00 00 01 00 00 00 01 2e
+```
 
 ## 参考
 1. [Report for lab1, Shian Chen](https://github.com/Clann24/jos/tree/master/lab1)
